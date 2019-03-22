@@ -15,7 +15,7 @@ type CacheMeta struct {
 	Refresh  bool
 }
 
-func (cm *CacheMeta) ConvertFn() []byte {
+func (cm *CacheMeta) convertFn() []byte {
 	// TODO add more types
 	var b []byte
 	switch cm.DataType {
@@ -30,7 +30,7 @@ func (cm *CacheMeta) ConvertFn() []byte {
 	return b
 }
 
-func (cm *CacheMeta) RevertFn(b []byte) interface{} {
+func (cm *CacheMeta) revertFn(b []byte) interface{} {
 	// TODO add more types
 	switch cm.DataType {
 	case "int":
@@ -46,18 +46,18 @@ func (cm *CacheMeta) RevertFn(b []byte) interface{} {
 	return nil
 }
 
-func GetFromCache(meta CacheMeta) interface{} {
-	exists := get(meta)
+func Get(meta CacheMeta) interface{} {
+	exists := retrieve(meta)
 	if exists == nil || meta.Refresh {
-		set(meta)
+		store(meta)
 	} else {
-		d := meta.RevertFn(exists)
+		d := meta.revertFn(exists)
 		meta.Data = d
 	}
 	return meta.Data
 }
 
-func del(meta CacheMeta) bool {
+func remove(meta CacheMeta) bool {
 	err := meta.Client.Delete(meta.Key)
 	if err != nil {
 		log.Println(err)
@@ -66,8 +66,8 @@ func del(meta CacheMeta) bool {
 	return true
 }
 
-func set(meta CacheMeta) bool {
-	err := meta.Client.Set(&memcache.Item{Key: meta.Key, Value: meta.ConvertFn()})
+func store(meta CacheMeta) bool {
+	err := meta.Client.Set(&memcache.Item{Key: meta.Key, Value: meta.convertFn()})
 	if err != nil {
 		log.Println(err)
 		return false
@@ -75,7 +75,7 @@ func set(meta CacheMeta) bool {
 	return true
 }
 
-func get(meta CacheMeta) []byte {
+func retrieve(meta CacheMeta) []byte {
 	it, err := meta.Client.Get(meta.Key)
 	if it == nil && err != nil {
 		return nil

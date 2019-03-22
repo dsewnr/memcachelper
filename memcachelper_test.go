@@ -19,9 +19,9 @@ func Test_GetFromCache(t *testing.T) {
 		Data:     testFn(0),
 		Refresh:  false,
 	}
-	ret := GetFromCache(meta)
+	ret := Get(meta)
 	t.Log("cache hit", ret)
 	meta.Refresh = true
-	ret = GetFromCache(meta)
+	ret = Get(meta)
 	t.Log("cache miss", ret)
 }
