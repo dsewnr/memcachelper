@@ -1,6 +1,7 @@
 package memcachelper
 
 import (
+	"fmt"
 	"log"
 	"strconv"
 
@@ -26,6 +27,9 @@ func (cm *CacheMeta) convertFn() []byte {
 	case "string":
 		b = []byte(cm.Data.(string))
 		break
+	case "float64":
+		b = []byte(fmt.Sprintf("%f", cm.Data.(float64)))
+		break
 	}
 	return b
 }
@@ -41,6 +45,12 @@ func (cm *CacheMeta) revertFn(b []byte) interface{} {
 		return d
 	case "string":
 		d := string(b)
+		return d
+	case "float64":
+		d, err := strconv.ParseFloat(string(b), 32)
+		if err != nil {
+			log.Println(err)
+		}
 		return d
 	}
 	return nil
